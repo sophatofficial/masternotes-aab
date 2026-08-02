@@ -1,0 +1,6 @@
+{
+  "name": "Master Notes",
+  "description": "An all-in-one note-taking and productivity app with AI tools, knowledge graph, tasks, scanner, and cloud sync.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
