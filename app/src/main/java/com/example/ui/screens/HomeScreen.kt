@@ -36,11 +36,13 @@ fun HomeScreen(
     onNavigateToEditor: (NoteEntity) -> Unit,
     onNavigateToScanner: () -> Unit,
     onNavigateToTasks: () -> Unit,
-    onNavigateToGraph: () -> Unit
+    onNavigateToGraph: () -> Unit,
+    onNavigateToVoice: () -> Unit
 ) {
     val notes by viewModel.notes.collectAsState()
     val pinnedAndStarred by viewModel.pinnedAndStarredNotes.collectAsState()
     val selectedFolder by viewModel.selectedFolder.collectAsState()
+    val strings by viewModel.strings.collectAsState()
 
     var showFolderMenu by remember { mutableStateOf(false) }
 
@@ -55,15 +57,15 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(SurfaceContainerHigh)
-                                .border(1.dp, OutlineVariantBorder.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
                                 .clickable { showFolderMenu = true }
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = selectedFolder,
-                                    color = OnSurfaceText,
+                                    text = if (selectedFolder == "All") strings.allNotes else selectedFolder,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -71,17 +73,22 @@ fun HomeScreen(
                                 Icon(
                                     imageVector = Icons.Default.ArrowDropDown,
                                     contentDescription = "Folder Menu",
-                                    tint = OnSurfaceVariantText
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             DropdownMenu(
                                 expanded = showFolderMenu,
                                 onDismissRequest = { showFolderMenu = false },
-                                modifier = Modifier.background(SurfaceContainer)
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
                             ) {
                                 listOf("All", "Personal", "Work", "Research", "Journal").forEach { folder ->
                                     DropdownMenuItem(
-                                        text = { Text(folder, color = OnSurfaceText) },
+                                        text = {
+                                            Text(
+                                                if (folder == "All") strings.allNotes else folder,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        },
                                         onClick = {
                                             viewModel.setSelectedFolder(folder)
                                             showFolderMenu = false
@@ -94,13 +101,23 @@ fun HomeScreen(
                 },
                 actions = {
                     IconButton(
+                        onClick = onNavigateToVoice,
+                        modifier = Modifier.testTag("voice_recorder_top_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = strings.voiceRecorderTitle,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(
                         onClick = { viewModel.setCommandPaletteOpen(true) },
                         modifier = Modifier.testTag("search_button")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Search",
-                            tint = ElectricIndigo
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                     IconButton(
@@ -109,15 +126,15 @@ fun HomeScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.SmartToy,
-                            contentDescription = "AI Brainstorm",
-                            tint = SkyBlue
+                            contentDescription = strings.brainstorm,
+                            tint = MaterialTheme.colorScheme.tertiary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = OxfordBlue)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         },
-        containerColor = OxfordBlue
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier

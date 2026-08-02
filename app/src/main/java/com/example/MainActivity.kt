@@ -40,8 +40,11 @@ class MainActivity : ComponentActivity() {
         AdMobConfig.initialize(this)
 
         setContent {
-            MasterNotesTheme {
-                val viewModel: MainViewModel = viewModel()
+            val viewModel: MainViewModel = viewModel()
+            val appTheme by viewModel.appTheme.collectAsState()
+            val strings by viewModel.strings.collectAsState()
+
+            MasterNotesTheme(appStyleTheme = appTheme) {
                 val navController = rememberNavController()
 
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -57,24 +60,32 @@ class MainActivity : ComponentActivity() {
                             AdMobBanner()
 
                             NavigationBar(
-                                containerColor = SurfaceContainerLow,
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                                 tonalElevation = 8.dp
                             ) {
                                 NavigationBarItem(
                                     selected = currentRoute == "home",
                                     onClick = { navController.navigate("home") },
-                                    icon = { Icon(if (currentRoute == "home") Icons.Filled.Home else Icons.Outlined.Home, contentDescription = "Home") },
-                                    label = { Text("Home") },
-                                    colors = NavigationBarItemDefaults.colors(selectedIconColor = ElectricIndigo, indicatorColor = SurfaceContainerHigh),
+                                    icon = { Icon(if (currentRoute == "home") Icons.Filled.Home else Icons.Outlined.Home, contentDescription = strings.navHome) },
+                                    label = { Text(strings.navHome) },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                                        indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                    ),
                                     modifier = Modifier.testTag("nav_home")
                                 )
 
                                 NavigationBarItem(
                                     selected = currentRoute == "graph",
                                     onClick = { navController.navigate("graph") },
-                                    icon = { Icon(if (currentRoute == "graph") Icons.Filled.Hub else Icons.Outlined.Hub, contentDescription = "Graph") },
-                                    label = { Text("Graph") },
-                                    colors = NavigationBarItemDefaults.colors(selectedIconColor = ElectricIndigo, indicatorColor = SurfaceContainerHigh),
+                                    icon = { Icon(if (currentRoute == "graph") Icons.Filled.Hub else Icons.Outlined.Hub, contentDescription = strings.navGraph) },
+                                    label = { Text(strings.navGraph) },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                                        indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                    ),
                                     modifier = Modifier.testTag("nav_graph")
                                 )
 
@@ -83,7 +94,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .size(52.dp)
                                         .clip(CircleShape)
-                                        .background(ElectricIndigo)
+                                        .background(MaterialTheme.colorScheme.primary)
                                         .clickable {
                                             viewModel.createNewNote("Untitled Note", "Personal")
                                             AdMobConfig.showInterstitialAd(this@MainActivity)
@@ -92,30 +103,43 @@ class MainActivity : ComponentActivity() {
                                         .testTag("create_note_center_fab"),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(Icons.Default.Add, contentDescription = "Create Note", tint = OxfordBlue, modifier = Modifier.size(28.dp))
+                                    Icon(
+                                        Icons.Default.Add,
+                                        contentDescription = strings.newNote,
+                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                        modifier = Modifier.size(28.dp)
+                                    )
                                 }
 
                                 NavigationBarItem(
                                     selected = currentRoute == "tasks",
                                     onClick = { navController.navigate("tasks") },
-                                    icon = { Icon(if (currentRoute == "tasks") Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle, contentDescription = "Tasks") },
-                                    label = { Text("Tasks") },
-                                    colors = NavigationBarItemDefaults.colors(selectedIconColor = ElectricIndigo, indicatorColor = SurfaceContainerHigh),
+                                    icon = { Icon(if (currentRoute == "tasks") Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle, contentDescription = strings.navTasks) },
+                                    label = { Text(strings.navTasks) },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                                        indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                    ),
                                     modifier = Modifier.testTag("nav_tasks")
                                 )
 
                                 NavigationBarItem(
                                     selected = currentRoute == "settings",
                                     onClick = { navController.navigate("settings") },
-                                    icon = { Icon(if (currentRoute == "settings") Icons.Filled.Settings else Icons.Outlined.Settings, contentDescription = "Settings") },
-                                    label = { Text("Settings") },
-                                    colors = NavigationBarItemDefaults.colors(selectedIconColor = ElectricIndigo, indicatorColor = SurfaceContainerHigh),
+                                    icon = { Icon(if (currentRoute == "settings") Icons.Filled.Settings else Icons.Outlined.Settings, contentDescription = strings.navSettings) },
+                                    label = { Text(strings.navSettings) },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                                        indicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                    ),
                                     modifier = Modifier.testTag("nav_settings")
                                 )
                             }
                         }
                     },
-                    containerColor = OxfordBlue
+                    containerColor = MaterialTheme.colorScheme.background
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
                         NavHost(
@@ -131,7 +155,20 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onNavigateToScanner = { navController.navigate("scanner") },
                                     onNavigateToTasks = { navController.navigate("tasks") },
-                                    onNavigateToGraph = { navController.navigate("graph") }
+                                    onNavigateToGraph = { navController.navigate("graph") },
+                                    onNavigateToVoice = { navController.navigate("voice") }
+                                )
+                            }
+
+                            composable("voice") {
+                                VoiceRecorderScreen(
+                                    viewModel = viewModel,
+                                    onBack = { navController.popBackStack() },
+                                    onNavigateToEditorTitle = { title, content ->
+                                        viewModel.createNewNote(title, "Voice")
+                                        viewModel.saveCurrentNote(title, content, "VoiceMemo,AI")
+                                        navController.navigate("editor")
+                                    }
                                 )
                             }
 
