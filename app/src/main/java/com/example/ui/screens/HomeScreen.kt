@@ -81,7 +81,7 @@ fun HomeScreen(
                                 onDismissRequest = { showFolderMenu = false },
                                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
                             ) {
-                                listOf("All", "Personal", "Work", "Research", "Journal").forEach { folder ->
+                                listOf("All", "Personal", "Work", "Development", "Education", "Finance", "Books", "Journal", "Research").forEach { folder ->
                                     DropdownMenuItem(
                                         text = {
                                             Text(
@@ -233,14 +233,71 @@ fun HomeScreen(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Review Research Sync", color = OnSurfaceText, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Text("Rev Sync", color = OnSurfaceText, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                             }
                         }
                     }
                 }
             }
 
-            // 2. Recent Notes (Horizontal Scroll)
+            // 2. Note Types & Templates Creator Bar
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    text = "Note Types & Templates",
+                    color = OnSurfaceText,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(end = 16.dp)
+                ) {
+                    val templateTypes = listOf(
+                        TemplateItem("Meeting Notes", "Work", "Meeting, Minutes", Icons.Outlined.EventNote, Color(0xFF6366F1), "## Attendees\n- \n\n## Agenda\n1. \n2. \n\n## Discussion\n- \n\n## Action Items\n- [ ] "),
+                        TemplateItem("Code Spec", "Development", "Code, Kotlin", Icons.Outlined.Code, Color(0xFF10B981), "## Architecture Spec\n\n```kotlin\nclass CoreEngine {\n    fun start() {\n    }\n}\n```\n\n- Performance target: < 100ms"),
+                        TemplateItem("Study Flashcards", "Education", "Study, Flashcards", Icons.Outlined.School, Color(0xFFF59E0B), "## Key Concepts\n- Concept 1:\n- Concept 2:\n\n## Flashcards\nQ: \nA: "),
+                        TemplateItem("Travel Checklist", "Personal", "Checklist, Planner", Icons.Outlined.TaskAlt, Color(0xFFEC4899), "## Essential Packing\n- [ ] Passport\n- [ ] Chargers\n- [ ] Clothes\n\n## Itinerary\n- Day 1: "),
+                        TemplateItem("Monthly Budget", "Finance", "Finance, Budget", Icons.Outlined.AttachMoney, Color(0xFF14B8A6), "## Income\n- Primary: $0\n\n## Fixed Expenses\n- Rent: $0\n- Utilities: $0"),
+                        TemplateItem("Book Summary", "Books", "Reading, Notes", Icons.Outlined.Bookmark, Color(0xFF8B5CF6), "## Book Info\n**Author**: \n**Rating**: ★★★★★\n\n## Core Key Takeaways\n1. "),
+                        TemplateItem("Daily Reflection", "Journal", "Gratitude, Reflection", Icons.Outlined.RateReview, Color(0xFF3B82F6), "## Daily Wins\n- \n\n## Gratitude\n1. \n2. ")
+                    )
+
+                    items(templateTypes) { template ->
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(SurfaceContainer)
+                                .border(1.dp, template.color.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+                                .clickable {
+                                    viewModel.createNewNote(template.title, template.folder)
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .clip(CircleShape)
+                                        .background(template.color.copy(alpha = 0.2f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(template.icon, contentDescription = null, tint = template.color, modifier = Modifier.size(16.dp))
+                                }
+                                Column {
+                                    Text(template.title, color = OnSurfaceText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                    Text(template.folder, color = OnSurfaceVariantText, fontSize = 10.sp)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. Recent Notes (Horizontal Scroll)
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -400,8 +457,28 @@ fun HomeScreen(
     }
 }
 
+data class TemplateItem(
+    val title: String,
+    val folder: String,
+    val tags: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val color: Color,
+    val defaultContent: String
+)
+
 @Composable
 fun NoteCard(note: NoteEntity, onClick: () -> Unit) {
+    val (badgeColor, badgeIcon) = when (note.folder.lowercase()) {
+        "development" -> Pair(Color(0xFF10B981), Icons.Outlined.Code)
+        "education" -> Pair(Color(0xFFF59E0B), Icons.Outlined.School)
+        "finance" -> Pair(Color(0xFF14B8A6), Icons.Outlined.AttachMoney)
+        "books" -> Pair(Color(0xFF8B5CF6), Icons.Outlined.Bookmark)
+        "journal" -> Pair(Color(0xFF3B82F6), Icons.Outlined.RateReview)
+        "work" -> Pair(Color(0xFF6366F1), Icons.Outlined.EventNote)
+        "research" -> Pair(Color(0xFFEC4899), Icons.Outlined.DocumentScanner)
+        else -> Pair(ElectricIndigo, Icons.Outlined.Folder)
+    }
+
     Box(
         modifier = Modifier
             .width(260.dp)
@@ -417,12 +494,19 @@ fun NoteCard(note: NoteEntity, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = note.folder,
-                    color = OnSurfaceVariantText,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(badgeIcon, contentDescription = null, tint = badgeColor, modifier = Modifier.size(14.dp))
+                    Text(
+                        text = note.folder.uppercase(),
+                        color = badgeColor,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                }
                 Icon(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = null,
@@ -450,7 +534,7 @@ fun NoteCard(note: NoteEntity, onClick: () -> Unit) {
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                note.tags.split(",").forEach { tag ->
+                note.tags.split(",").take(3).forEach { tag ->
                     if (tag.isNotBlank()) {
                         Box(
                             modifier = Modifier

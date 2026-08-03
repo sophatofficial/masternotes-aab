@@ -36,6 +36,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Initialize Firebase SDK
+        try {
+            com.google.firebase.FirebaseApp.initializeApp(this)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "FirebaseApp initialization error", e)
+        }
+
         // Initialize Google AdMob SDK
         AdMobConfig.initialize(this)
 

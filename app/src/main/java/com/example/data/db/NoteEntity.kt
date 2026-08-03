@@ -17,5 +17,6 @@ data class NoteEntity(
     val wordCount: Int = 0,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
-    val linkedNoteIds: String = ""
+    val linkedNoteIds: String = "",
+    val isSynced: Boolean = false
 )

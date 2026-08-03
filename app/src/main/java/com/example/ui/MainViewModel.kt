@@ -26,9 +26,104 @@ import kotlinx.coroutines.launch
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: NoteRepository
 
+    private fun getFirebaseAuth(): com.google.firebase.auth.FirebaseAuth? {
+        return try {
+            val apps = com.google.firebase.FirebaseApp.getApps(getApplication())
+            if (apps.isEmpty()) {
+                try {
+                    com.google.firebase.FirebaseApp.initializeApp(getApplication())
+                } catch (e: Exception) {
+                    android.util.Log.w("MainViewModel", "FirebaseApp.initializeApp failed", e)
+                }
+            }
+            if (com.google.firebase.FirebaseApp.getApps(getApplication()).isEmpty()) {
+                return null
+            }
+            com.google.firebase.auth.FirebaseAuth.getInstance()
+        } catch (e: Throwable) {
+            android.util.Log.e("MainViewModel", "Firebase auth not initialized", e)
+            null
+        }
+    }
+
+    private val _currentUser = MutableStateFlow<com.google.firebase.auth.FirebaseUser?>(getFirebaseAuth()?.currentUser)
+    val currentUser: StateFlow<com.google.firebase.auth.FirebaseUser?> = _currentUser.asStateFlow()
+
     init {
         val database = AppDatabase.getDatabase(application)
         repository = NoteRepository(database.noteDao(), database.taskDao())
+        
+        getFirebaseAuth()?.addAuthStateListener { firebaseAuth ->
+            _currentUser.value = firebaseAuth.currentUser
+            syncWithCloud()
+        }
+        
+        syncWithCloud()
+    }
+
+    fun syncWithCloud() {
+        viewModelScope.launch {
+            repository.syncWithFirestore()
+        }
+    }
+
+    fun signInAnonymously(onResult: (Boolean, String?) -> Unit) {
+        val auth = getFirebaseAuth()
+        if (auth == null) {
+            onResult(false, "Firebase is not configured")
+            return
+        }
+        auth.signInAnonymously()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _currentUser.value = auth.currentUser
+                    syncWithCloud()
+                    onResult(true, null)
+                } else {
+                    onResult(false, task.exception?.localizedMessage)
+                }
+            }
+    }
+
+    fun signInWithEmail(email: String, pass: String, onResult: (Boolean, String?) -> Unit) {
+        val auth = getFirebaseAuth()
+        if (auth == null) {
+            onResult(false, "Firebase is not configured")
+            return
+        }
+        auth.signInWithEmailAndPassword(email, pass)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _currentUser.value = auth.currentUser
+                    syncWithCloud()
+                    onResult(true, null)
+                } else {
+                    onResult(false, task.exception?.localizedMessage)
+                }
+            }
+    }
+
+    fun signUpWithEmail(email: String, pass: String, onResult: (Boolean, String?) -> Unit) {
+        val auth = getFirebaseAuth()
+        if (auth == null) {
+            onResult(false, "Firebase is not configured")
+            return
+        }
+        auth.createUserWithEmailAndPassword(email, pass)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _currentUser.value = auth.currentUser
+                    syncWithCloud()
+                    onResult(true, null)
+                } else {
+                    onResult(false, task.exception?.localizedMessage)
+                }
+            }
+    }
+
+    fun signOut() {
+        getFirebaseAuth()?.signOut()
+        _currentUser.value = null
     }
 
     // App Visual Style Theme
@@ -269,16 +364,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Task Actions
-    fun addTask(title: String, dueDate: String = "Today", noteSource: String? = null) {
+    fun addTask(title: String, dueDate: String = "Today", noteSource: String? = null, priority: String = "Medium", taskNotes: String? = null) {
         viewModelScope.launch {
             repository.insertTask(
                 TaskEntity(
                     title = title,
                     dueDate = dueDate,
                     noteSource = noteSource,
-                    category = "Focus"
+                    priority = priority,
+                    category = "Focus",
+                    taskNotes = taskNotes
                 )
             )
+        }
+    }
+
+    fun updateTask(task: TaskEntity) {
+        viewModelScope.launch {
+            repository.updateTask(task)
         }
     }
 

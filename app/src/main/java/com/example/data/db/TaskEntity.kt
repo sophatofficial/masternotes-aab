@@ -12,5 +12,6 @@ data class TaskEntity(
     val isCompleted: Boolean = false,
     val priority: String = "Medium",
     val category: String = "Focus",
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val taskNotes: String? = null
 )

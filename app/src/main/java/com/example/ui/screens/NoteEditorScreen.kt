@@ -200,6 +200,36 @@ fun NoteEditorScreen(
 
                 HorizontalDivider(color = OutlineVariantBorder.copy(alpha = 0.3f))
 
+                // AI Action Quick Bar
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = SkyBlue, modifier = Modifier.size(16.dp))
+                        Text("GEMINI AI ASSISTANT", color = SkyBlue, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+                    }
+
+                    FilledTonalButton(
+                        onClick = { viewModel.runAiSummarize(titleText, contentText) },
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = SkyBlue.copy(alpha = 0.15f),
+                            contentColor = SkyBlue
+                        ),
+                        shape = RoundedCornerShape(20.dp),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                        modifier = Modifier.testTag("summarize_button")
+                    ) {
+                        Icon(Icons.Outlined.Compress, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Summarize Note", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+
                 // AI Response Banner if available
                 if (isAiLoading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = SkyBlue)

@@ -52,12 +52,12 @@ data class LocalizedStrings(
     val tapToRecord: String,
     val transcribeAi: String,
     val audioMemos: String,
-    val savePdf: String,
-    val saveImage: String,
-    val scannedDocsLibrary: String,
-    val cameraViewfinder: String,
-    val flashOn: String,
-    val flashOff: String
+    val savePdf: String = "Save as PDF",
+    val saveImage: String = "Save as Image",
+    val scannedDocsLibrary: String = "Scanned Documents Library",
+    val cameraViewfinder: String = "Camera Viewfinder",
+    val flashOn: String = "Flash ON",
+    val flashOff: String = "Flash OFF"
 )
 
 object AppStrings {
@@ -102,13 +102,7 @@ object AppStrings {
         recording = "Recording Audio...",
         tapToRecord = "Tap Mic to Start Recording",
         transcribeAi = "Transcribe with AI",
-        audioMemos = "Voice Memos Library",
-        savePdf = "Save PDF",
-        saveImage = "Save Image",
-        scannedDocsLibrary = "Scanned Docs Library",
-        cameraViewfinder = "Camera Viewfinder",
-        flashOn = "Flash On",
-        flashOff = "Flash Off"
+        audioMemos = "Voice Memos Library"
     )
 
     private val SpanishStrings = LocalizedStrings(
@@ -152,13 +146,7 @@ object AppStrings {
         recording = "Grabando Audio...",
         tapToRecord = "Presiona Micrófono para Grabar",
         transcribeAi = "Transcripción con IA",
-        audioMemos = "Biblioteca de Memos de Voz",
-        savePdf = "Guardar PDF",
-        saveImage = "Guardar Imagen",
-        scannedDocsLibrary = "Biblioteca de Documentos Escaneados",
-        cameraViewfinder = "Visor de Cámara",
-        flashOn = "Flash Encendido",
-        flashOff = "Flash Apagado"
+        audioMemos = "Biblioteca de Memos de Voz"
     )
 
     private val FrenchStrings = LocalizedStrings(
@@ -202,13 +190,7 @@ object AppStrings {
         recording = "Enregistrement Audio...",
         tapToRecord = "Appuyez sur le micro pour enregistrer",
         transcribeAi = "Transcrire avec l'IA",
-        audioMemos = "Bibliothèque de Mémos Vocaux",
-        savePdf = "Enregistrer PDF",
-        saveImage = "Enregistrer l'image",
-        scannedDocsLibrary = "Bibliothèque de Documents Scannés",
-        cameraViewfinder = "Viseur de l'appareil photo",
-        flashOn = "Flash Activé",
-        flashOff = "Flash Désactivé"
+        audioMemos = "Bibliothèque de Mémos Vocaux"
     )
 
     private val GermanStrings = LocalizedStrings(
@@ -252,13 +234,7 @@ object AppStrings {
         recording = "Audio wird aufgenommen...",
         tapToRecord = "Tippen Sie zum Aufnehmen auf das Mikrofon",
         transcribeAi = "Mit KI transkribieren",
-        audioMemos = "Sprachmemo-Bibliothek",
-        savePdf = "PDF speichern",
-        saveImage = "Bild speichern",
-        scannedDocsLibrary = "Bibliothek für gescannte Dokumente",
-        cameraViewfinder = "Kamerasucher",
-        flashOn = "Blitz ein",
-        flashOff = "Blitz aus"
+        audioMemos = "Sprachmemo-Bibliothek"
     )
 
     private val ChineseStrings = LocalizedStrings(
@@ -302,13 +278,7 @@ object AppStrings {
         recording = "正在录音...",
         tapToRecord = "点击麦克风开始录音",
         transcribeAi = "AI 转文字与摘要",
-        audioMemos = "语音备忘录库",
-        savePdf = "保存 PDF",
-        saveImage = "保存图片",
-        scannedDocsLibrary = "已扫描文档库",
-        cameraViewfinder = "相机取景器",
-        flashOn = "闪光灯开启",
-        flashOff = "闪光灯关闭"
+        audioMemos = "语音备忘录库"
     )
 
     private val JapaneseStrings = LocalizedStrings(
@@ -352,13 +322,7 @@ object AppStrings {
         recording = "録音中...",
         tapToRecord = "マイクをタップして録音開始",
         transcribeAi = "AIで文字起こし",
-        audioMemos = "ボイスメモライブラリ",
-        savePdf = "PDFとして保存",
-        saveImage = "画像として保存",
-        scannedDocsLibrary = "スキャン済みドキュメントライブラリ",
-        cameraViewfinder = "カメラビューファインダー",
-        flashOn = "フラッシュオン",
-        flashOff = "フラッシュオフ"
+        audioMemos = "ボイスメモライブラリ"
     )
 
     private val KhmerStrings = LocalizedStrings(
@@ -402,13 +366,7 @@ object AppStrings {
         recording = "កំពុងថតសំឡេង...",
         tapToRecord = "ចុចមីក្រូហ្វូនដើម្បីចាប់ផ្តើមថត",
         transcribeAi = "បកប្រែសំឡេងទៅជាអក្សរដោយ AI",
-        audioMemos = "បណ្ណាល័យសំឡេង",
-        savePdf = "រក្សាទុកជា PDF",
-        saveImage = "រក្សាទុកជារូបភាព",
-        scannedDocsLibrary = "បណ្ណាល័យឯកសារស្កែន",
-        cameraViewfinder = "ឧបករណ៍រកមើលនៃកាមេរ៉ា",
-        flashOn = "បើកហ្វ្លាស",
-        flashOff = "បិទហ្វ្លាស"
+        audioMemos = "បណ្ណាល័យសំឡេង"
     )
 
     fun get(language: AppLanguage): LocalizedStrings = when (language) {

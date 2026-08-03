@@ -270,6 +270,130 @@ fun SettingsScreen(
                 }
             }
 
+            // User Account & Cloud Sync
+            val currentUser by viewModel.currentUser.collectAsState()
+            var emailInput by remember { mutableStateOf("") }
+            var passwordInput by remember { mutableStateOf("") }
+            var authErrorMessage by remember { mutableStateOf<String?>(null) }
+            var isSignUpMode by remember { mutableStateOf(false) }
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text("ACCOUNT & FIREBASE AUTH", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    if (currentUser != null) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = currentUser?.email ?: if (currentUser?.isAnonymous == true) "Guest Account (Anonymous)" else "Logged In User",
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            )
+                            Text(
+                                text = "UID: ${currentUser?.uid}",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 11.sp
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Icon(Icons.Default.CloudDone, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                                Text("Notes secured & synced to account", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                            }
+                        }
+
+                        Button(
+                            onClick = { viewModel.signOut() },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer),
+                            modifier = Modifier.fillMaxWidth().testTag("sign_out_button")
+                        ) {
+                            Text("Sign Out")
+                        }
+                    } else {
+                        Text(
+                            "Sign in to securely sync your notes and tasks across all your devices.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp
+                        )
+
+                        OutlinedTextField(
+                            value = emailInput,
+                            onValueChange = { emailInput = it },
+                            label = { Text("Email") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth().testTag("auth_email_input")
+                        )
+
+                        OutlinedTextField(
+                            value = passwordInput,
+                            onValueChange = { passwordInput = it },
+                            label = { Text("Password") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth().testTag("auth_password_input")
+                        )
+
+                        if (authErrorMessage != null) {
+                            Text(authErrorMessage!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Button(
+                                onClick = {
+                                    authErrorMessage = null
+                                    if (isSignUpMode) {
+                                        viewModel.signUpWithEmail(emailInput, passwordInput) { success, err ->
+                                            if (!success) authErrorMessage = err ?: "Sign up failed"
+                                        }
+                                    } else {
+                                        viewModel.signInWithEmail(emailInput, passwordInput) { success, err ->
+                                            if (!success) authErrorMessage = err ?: "Sign in failed"
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.weight(1f).testTag("auth_submit_button")
+                            ) {
+                                Text(if (isSignUpMode) "Sign Up" else "Sign In")
+                            }
+
+                            OutlinedButton(
+                                onClick = { isSignUpMode = !isSignUpMode },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(if (isSignUpMode) "Switch to Sign In" else "Switch to Sign Up")
+                            }
+                        }
+
+                        TextButton(
+                            onClick = {
+                                viewModel.signInAnonymously { success, err ->
+                                    if (!success) authErrorMessage = err ?: "Guest login failed"
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().testTag("auth_guest_button")
+                        ) {
+                            Text("Continue as Guest (Instant Anonymous Sync)")
+                        }
+                    }
+                }
+            }
+
             // Sync & Storage
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),

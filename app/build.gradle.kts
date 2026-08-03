@@ -26,13 +26,11 @@ android {
 
   signingConfigs {
     create("release") {
-      val keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
-      if (!keystorePath.isNullOrEmpty()) {
-        storeFile = file(keystorePath)
-      }
-      storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
-      keyAlias = System.getenv("ANDROID_KEY_ALIAS")
-      keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+      val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
+      storeFile = file(keystorePath)
+      storePassword = System.getenv("STORE_PASSWORD")
+      keyAlias = "upload"
+      keyPassword = System.getenv("KEY_PASSWORD")
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
@@ -47,14 +45,7 @@ android {
       isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-
-      val hasSigningEnv = !System.getenv("ANDROID_KEYSTORE_PATH").isNullOrEmpty() &&
-                          !System.getenv("ANDROID_KEYSTORE_PASSWORD").isNullOrEmpty() &&
-                          !System.getenv("ANDROID_KEY_ALIAS").isNullOrEmpty() &&
-                          !System.getenv("ANDROID_KEY_PASSWORD").isNullOrEmpty()
-      if (hasSigningEnv) {
-        signingConfig = signingConfigs.getByName("release")
-      }
+      signingConfig = signingConfigs.getByName("release")
     }
     debug { signingConfig = signingConfigs.getByName("debugConfig") }
   }
@@ -85,10 +76,10 @@ dependencies {
   implementation(platform(libs.firebase.bom))
   // implementation(libs.accompanist.permissions)
   implementation(libs.androidx.activity.compose)
-  // implementation(libs.androidx.camera.camera2)
-  // implementation(libs.androidx.camera.core)
-  // implementation(libs.androidx.camera.lifecycle)
-  // implementation(libs.androidx.camera.view)
+  implementation(libs.androidx.camera.camera2)
+  implementation(libs.androidx.camera.core)
+  implementation(libs.androidx.camera.lifecycle)
+  implementation(libs.androidx.camera.view)
   implementation(libs.androidx.compose.material.icons.core)
   implementation(libs.androidx.compose.material.icons.extended)
   implementation(libs.androidx.compose.material3)
@@ -109,15 +100,14 @@ dependencies {
   implementation(libs.retrofit.converter.serialization)
   implementation(libs.converter.moshi)
   implementation(libs.firebase.ai)
-  // Uncomment to use Firestore:
-  // implementation(libs.firebase.firestore)
+  implementation(libs.firebase.firestore)
 
   // Uncomment ALL FOUR of the following dependencies together to use Firebase Auth and Google
   // Sign-In via Credential Manager:
-  // implementation(libs.firebase.auth)
-  // implementation(libs.androidx.credentials)
-  // implementation(libs.androidx.credentials.play.services)
-  // implementation(libs.googleid)
+  implementation(libs.firebase.auth)
+  implementation(libs.androidx.credentials)
+  implementation(libs.androidx.credentials.play.services)
+  implementation(libs.googleid)
   implementation(libs.firebase.appcheck.recaptcha)
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
